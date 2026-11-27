@@ -50,7 +50,10 @@ const EMAILS = new Map();   // подтверждённая почта -> клю
 
 // ===================== магазин (цены — только на сервере) =====================
 const SHOP = [['sh', null, 0], ['sh', '#e74c3c', 50], ['sh', '#3498db', 50], ['sh', '#2ecc71', 50], ['sh', '#f1c40f', 60], ['sh', '#9b59b6', 80], ['sh', '#222222', 80],
-  ['hat', null, 0], ['hat', 'cube', 150], ['hat', 'tall', 200], ['hat', 'crown', 500]];
+  ['hat', null, 0], ['hat', 'cube', 150], ['hat', 'tall', 200], ['hat', 'crown', 500],
+  ['shirt','blue',0],['shirt','red',50],['shirt','green',50],['shirt','purple',80],['shirt','black',80],
+  ['pants','black',0],['pants','jeans',70],['pants','gray',50],['pants','olive',90],['pants','cargo',100],
+  ['hair','brown',0],['hair','black',70],['hair','blond',80],['hair','spiky',100],['hair','long',120]];
 const shopItem = (k, val) => SHOP.find(i => i[0] === k && i[1] === val) || null;
 const shopKey = (k, val) => k + ':' + val;
 // ===================== яйца (шансы и цена — только на сервере) =====================
@@ -144,7 +147,7 @@ function normAccount(key, a) {
     const v = eq[k] === undefined ? null : eq[k];
     if (v === null) continue;
     if (typeof v === 'string' && UKEY.test(v)) { if (k !== 'sh') r.eq[k] = v; continue }   // существование вещи проверяется при показе (presEq)
-    const it = (k === 'sh' || k === 'hat') ? shopItem(k, v) : null;
+    const it = shopItem(k, v);
     if (it && (it[2] === 0 || r.owned.includes(shopKey(k, v)))) r.eq[k] = v;
   }
 
@@ -885,7 +888,6 @@ H.shop = async (ws, m) => {
     }
     a.eq[k] = val; dirty('a', ws.u); return pub(a);
   }
-  if (k !== 'sh' && k !== 'hat') throw new Err('Неизвестный товар.');
   const it = typeof val === 'string' ? shopItem(k, val) : null;
   if (!it) throw new Err('Неизвестный товар.');
   const key = shopKey(k, val);
