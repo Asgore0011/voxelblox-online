@@ -150,6 +150,11 @@ function normAccount(key, a) {
     const it = shopItem(k, v);
     if (it && (it[2] === 0 || r.owned.includes(shopKey(k, v)))) r.eq[k] = v;
   }
+  // Existing and new accounts get the free starter outfit when a slot is empty.
+  for (const [k, v] of [['shirt', 'blue'], ['pants', 'black'], ['hair', 'brown']]) {
+    const it = shopItem(k, v);
+    if (!Object.hasOwn(r.eq, k) && it && it[2] === 0) r.eq[k] = v;
+  }
 
   if (a.lastLogin) r.lastLogin = +a.lastLogin || 0;
   if (typeof a.email === 'string' && a.email.length <= 120 && EMAIL_RE.test(a.email)) r.email = a.email.toLowerCase();   // только подтверждённая кодом
