@@ -53,7 +53,8 @@ const SHOP = [['sh', null, 0], ['sh', '#e74c3c', 50], ['sh', '#3498db', 50], ['s
   ['hat', null, 0], ['hat', 'cube', 150], ['hat', 'tall', 200], ['hat', 'crown', 500],
   ['shirt','blue',0],['shirt','red',50],['shirt','green',50],['shirt','purple',80],['shirt','black',80],
   ['pants','black',0],['pants','jeans',70],['pants','gray',50],['pants','olive',90],['pants','cargo',100],
-  ['hair','brown',0],['hair','black',70],['hair','blond',80],['hair','spiky',100],['hair','long',120]];
+  ['hair','brown',0],['hair','black',70],['hair','blond',80],['hair','spiky',100],['hair','long',120],
+  ['hair','pack_01',0],['hair','pack_02',70],['hair','pack_03',90],['hair','pack_04',70],['hair','pack_05',90],['hair','pack_06',90],['hair','pack_07',100],['hair','pack_08',100],['hair','pack_09',110],['hair','pack_10',120],['hair','pack_11',120],['hair','pack_12',120],['hair','pack_13',130],['hair','pack_14',150]];
 const shopItem = (k, val) => SHOP.find(i => i[0] === k && i[1] === val) || null;
 const shopKey = (k, val) => k + ':' + val;
 // ===================== яйца (шансы и цена — только на сервере) =====================
@@ -156,6 +157,7 @@ function normAccount(key, a) {
     if (!Object.hasOwn(r.eq, k) && it && it[2] === 0) r.eq[k] = v;
   }
 
+  if (typeof eq.hc === 'string' && /^#[0-9a-f]{6}$/i.test(eq.hc)) r.eq.hc = eq.hc.toLowerCase();
   if (a.lastLogin) r.lastLogin = +a.lastLogin || 0;
   if (typeof a.email === 'string' && a.email.length <= 120 && EMAIL_RE.test(a.email)) r.email = a.email.toLowerCase();   // только подтверждённая кодом
   const ids = v => Array.isArray(v) ? [...new Set(v.filter(x => typeof x === 'string' && x.length <= 16))].slice(0, 300) : [];
@@ -880,6 +882,12 @@ H['admin.place.delete'] = async (ws, m) => {
 H.shop = async (ws, m) => {
   const a = need(ws); rateUser(ws, 'shop', 3, 6);
   const k = m.k, val = m.val === undefined ? null : m.val;
+  if (k === 'hc') {
+    if (val === null) delete a.eq.hc;
+    else if (typeof val === 'string' && /^#[0-9a-f]{6}$/i.test(val)) a.eq.hc = val.toLowerCase();
+    else throw new Err('Неверный цвет волос.');
+    dirty('a', ws.u); return pub(a);
+  }
   if (!['sh', 'hat', 'hair', 'acc', 'shirt', 'pants'].includes(k)) throw new Err('Неизвестный товар.');
   if (val === null) { delete a.eq[k]; dirty('a', ws.u); return pub(a) }
   if (typeof val === 'string' && UKEY.test(val)) {          // вещь, созданная игроком
